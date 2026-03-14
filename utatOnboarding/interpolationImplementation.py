@@ -67,8 +67,65 @@ def upscale_image(inputPath, outputPath):
     print("Upscaled image saved")
 
 
+""" 
+from https://github.com/jingmengzhiyue/HyperEvalSR/blob/master/HyperEvalSR/metrics.py 
+changed for peak vector RMSE rather than scalar 
+
+"""
+
+
+def peakVectorRMSE(ref_img, rec_img):
+    """Calculate the peak vector rmse between two images
+
+    computes RGB vector difference per corresponding pixel, iterating across image, then normalises w max magnitude
+    Args:
+        ref_img (numpy.ndarray): The reference image.
+        rec_img (numpy.ndarray): The reconstructed image.
+
+    Returns:
+        float: The computed RMSE value.
+    """
+    if ref_img.shape != rec_img.shape:
+        raise ValueError(
+            "Reference and reconstructed images must have the same dimensions."
+        )
+    if not isinstance(ref_img, np.ndarray) or not isinstance(rec_img, np.ndarray):
+        raise TypeError("Input images must be numpy arrays.")
+
+    ref_img = ref_img.astype(np.float32)
+    rec_img = rec_img.astype(np.float32)
+    diff = ref_img - rec_img
+    """ original code for scalar, changed below
+    squared_diff = np.square(diff)
+    mse = np.mean(squared_diff)
+    Recult_rmse = np.sqrt(mse)
+    return Recult_rmse
+    """
+
+    mag = np.linalg.norm(diff, axis=2)
+    rmse = np.sqrt(np.mean(mag**2))
+    peak = np.sqrt(255**2 * 3)
+    return rmse / peak
+
+
 # run
 upscale_image(
-    "/Users/shelley/Desktop/pythonFiles/utatFirstTask/skulePhoto.jpg",
-    "upscaled_2x_skulePhoto.jpg",
+    "/Users/shelley/Desktop/pythonFiles/utatOnboarding/skulePhoto.jpg",
+    "/Users/shelley/Desktop/pythonFiles/utatOnboarding/upscaled_2x_skulePhoto.jpg",
 )
+
+original = cv2.imread(
+    "/Users/shelley/Desktop/pythonFiles/utatOnboarding/skulePhoto.jpg"
+)
+reconstructed = cv2.imread(
+    "/Users/shelley/Desktop/pythonFiles/utatOnboarding/upscaled_2x_skulePhoto.jpg"
+)
+
+original_resized = cv2.resize(  # peakVectorRMSE compare pixel by pixel so must resize
+    original,
+    (reconstructed.shape[1], reconstructed.shape[0]),
+    interpolation=cv2.INTER_CUBIC,
+)
+
+
+print("Peak Vector RMSE:", peakVectorRMSE(original_resized, reconstructed))
