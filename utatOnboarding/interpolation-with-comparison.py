@@ -4,6 +4,16 @@ import numpy as np
 
 def get_q_coefficients(offset):
     "bicubic interpolation w 4 basis functions: q1,q2,q3,q4"
+    """ Uses a third-order polynomial to determine the influence (q1-q4)
+    of the surrounding four pixels based on the fractional offset.
+
+    Args:
+        offset (float): The distance (0 to 1) from the known sample.
+
+    Returns:
+        tuple: (q1, q2, q3, q4) coefficients.
+    """
+
     offsetPow2 = offset**2
     offsetPow3 = offset**3
 
@@ -15,6 +25,18 @@ def get_q_coefficients(offset):
 
 
 def upscale_image(inputPath, outputPath):
+    "Double image resolution using a two-pass bicubic interpolation."
+    """Maps existing pixels to a 2x grid, then fills horizontal and vertical
+    gaps using cubic weighting. Handles boundaries via simple replication.
+
+    Args:
+        inputPath (str): Path to the source image file.
+        outputPath (str): Path to save the 2x upscaled result.
+
+    Returns:
+        None: Saves the image and prints a completion message.
+    """
+
     # load image
     img = cv2.imread(inputPath)
     if img is None:
@@ -67,23 +89,18 @@ def upscale_image(inputPath, outputPath):
     print("Upscaled image saved")
 
 
-""" 
-from https://github.com/jingmengzhiyue/HyperEvalSR/blob/master/HyperEvalSR/metrics.py 
-changed for peak vector RMSE rather than scalar 
-
-"""
-
-
 def peakVectorRMSE(ref_img, rec_img):
-    """Calculate the peak vector rmse between two images
-
-    computes RGB vector difference per corresponding pixel, iterating across image, then normalises w max magnitude
+    "Calculate the peak vector rmse between two images"
+    """computes RGB vector difference per corresponding pixel, iterating across image, then normalises w max magnitude
     Args:
         ref_img (numpy.ndarray): The reference image.
         rec_img (numpy.ndarray): The reconstructed image.
 
     Returns:
         float: The computed RMSE value.
+
+    interpretted from https://github.com/jingmengzhiyue/HyperEvalSR/blob/master/HyperEvalSR/metrics.py
+    changed for peak vector RMSE rather than scalar
     """
     if ref_img.shape != rec_img.shape:
         raise ValueError(
@@ -95,13 +112,6 @@ def peakVectorRMSE(ref_img, rec_img):
     ref_img = ref_img.astype(np.float32)
     rec_img = rec_img.astype(np.float32)
     diff = ref_img - rec_img
-    """ original code for scalar, changed below
-    squared_diff = np.square(diff)
-    mse = np.mean(squared_diff)
-    Recult_rmse = np.sqrt(mse)
-    return Recult_rmse
-    """
-
     mag = np.linalg.norm(diff, axis=2)
     rmse = np.sqrt(np.mean(mag**2))
     peak = np.sqrt(255**2 * 3)
