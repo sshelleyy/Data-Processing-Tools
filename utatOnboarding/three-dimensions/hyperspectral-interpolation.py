@@ -111,8 +111,8 @@ def peakVectorRMSE(ref_cube, rec_cube):
     "Computes error between hyperspectral cubes"
     """changed from comparing pixel vals to full spectral vector at each pixel (all bands @ once). also, again, norms by max vector magnitude (so 0<result<1)
     Args:
-        ref_cube (numpy.ndarray): The reference cube (h,w,b) file..
-        rec_cube (numpy.ndarray): The reconstructed cube (2h,2w,b) file..
+        ref_cube (numpy.ndarray): The reference cube (h,w,b) file.
+        rec_cube (numpy.ndarray): The reconstructed cube (2h,2w,b) file.
 
     Returns:
         float: The computed RMSE value.
@@ -139,10 +139,30 @@ def peakVectorRMSE(ref_cube, rec_cube):
     return rmse / peak
 
 
+def max_abs_distortion(ref_cube, rec_cube):
+    """compute MAD, alternative to PV RMSE
+
+    Args:
+        ref_cube (numpy.ndarray): The reference cube (h, w, b).
+        rec_cube (numpy.ndarray): The reconstructed cube (h, w, b).
+
+    Returns:
+        float: The MAD found between any two corresponding pixels.
+    """
+    if ref_cube.shape != rec_cube.shape:
+        raise ValueError("Cubes must have same dims. ")
+    ref_cube = ref_cube.astype(np.float32)
+    rec_cube = rec_cube.astype(np.float32)
+    abs_diff = np.abs(ref_cube - rec_cube)
+    mad = np.max(abs_diff)
+
+    return mad
+
+
 # run
-original_path = "/Users/shelley/Desktop/pythonFiles/utatOnboarding/three-dimensions/indian-pine-files/indian_pine_array.npy"
-og_lowres_path = "/Users/shelley/Desktop/pythonFiles/utatOnboarding/three-dimensions/indian-pine-files/resized_IPA.npy"
-upscaled_path = "/Users/shelley/Desktop/pythonFiles/utatOnboarding/three-dimensions/indian-pine-files/upscaled_IPA_array.npy"
+original_path = "/Users/shelley/Desktop/pythonFiles/utatOnboarding/three-dimensions/sample-data-cubes/indian-pine-files/indian_pine_array.npy"
+og_lowres_path = "/Users/shelley/Desktop/pythonFiles/utatOnboarding/three-dimensions/sample-data-cubes/indian-pine-files/resized_IPA.npy"
+upscaled_path = "/Users/shelley/Desktop/pythonFiles/utatOnboarding/three-dimensions/sample-data-cubes/indian-pine-files/upscaled_IPA.npy"
 
 original = np.load(original_path)
 
@@ -160,4 +180,8 @@ og_lowres = np.load(og_lowres_path)
 upscale_hyperspectral(og_lowres_path, upscaled_path)
 upscaled = np.load(upscaled_path)
 
+print(
+    "MAD Error percentage:",
+    ((max_abs_distortion(original, upscaled)) * 100) / ((2**16) - 1),
+)
 print("Peak Vector RMSE:", peakVectorRMSE(original, upscaled))
