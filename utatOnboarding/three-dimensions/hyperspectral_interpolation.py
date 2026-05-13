@@ -162,7 +162,7 @@ def max_abs_distortion(ref_cube, rec_cube):
 # run
 original_path = "/Users/shelley/Desktop/pythonFiles/utatOnboarding/three-dimensions/sample-data-cubes/indian-pine-files/indian_pine_array.npy"
 og_lowres_path = "/Users/shelley/Desktop/pythonFiles/utatOnboarding/three-dimensions/sample-data-cubes/indian-pine-files/resized_IPA.npy"
-upscaled_path = "/Users/shelley/Desktop/pythonFiles/utatOnboarding/three-dimensions/sample-data-cubes/indian-pine-files/upscaled_IPA.npy"
+upscaled_path = "/Users/shelley/Desktop/pythonFiles/utatOnboarding/three-dimensions/sample-data-cubes/indian-pine-files/upscaled_IPA.npy"  # upscaled from compressed file
 
 original = np.load(original_path)
 
@@ -181,7 +181,7 @@ upscale_hyperspectral(og_lowres_path, upscaled_path)
 upscaled = np.load(upscaled_path)
 
 print(
-    "MAD Error percentage:",
-    ((max_abs_distortion(original, upscaled)) * 100) / ((2**16) - 1),
+    "MAD Error:",
+    (max_abs_distortion(original, upscaled)),
 )
 print("Peak Vector RMSE:", peakVectorRMSE(original, upscaled))

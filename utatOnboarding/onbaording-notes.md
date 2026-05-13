@@ -1,4 +1,10 @@
 # Onboarding Notes for Data Processing
+
+## to do 02/05/2026
+- add mad and peak vector rmse functions to github repo, 
+- create read me's and documentation for other members to read and learn about these
+- integrate repos existing datacubes to make testing of functions seamless
+
 ## super resolution (SR)
 means converting low res images (LR) to high res images (HR)
 - multiple methods depending on characteristics of LR images
